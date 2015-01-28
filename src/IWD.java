@@ -11,6 +11,7 @@ public class IWD {
 	private Connection conn;
 	private Statement stmt;
 	private String filePath = null;
+	private String defaultPath = "C:/default.txt";
 	
 	
 	public IWD(String usr, String pw)
@@ -48,7 +49,7 @@ public class IWD {
 		}
 	}
 	
-	private ResultSet query(String sql)
+	public ResultSet query(String sql)
 	{
 		try{
 			ResultSet rs = this.stmt.executeQuery(sql);
@@ -57,8 +58,8 @@ public class IWD {
 		catch(Exception e)
 		{
 			e.printStackTrace();
+			return null;
 		}
-		return null;
 	}
 	
 	public void printResult(String sql)
@@ -94,10 +95,10 @@ public class IWD {
 			File file = null;
 			if(this.filePath == null)
 			{
-				file = new File("C:/default.txt");
+				file = new File(this.defaultPath);
 			}
 			else{
-				file = new File("this.filePath");
+				file = new File(this.filePath);
 			}
 			if(!file.exists())
 			{
@@ -115,5 +116,15 @@ public class IWD {
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	public void setDefaultPath(String path)
+	{
+		this.defaultPath = path;
+	}
+	
+	public String getDefaultPath(String path)
+	{
+		return this.defaultPath;
 	}
 }
