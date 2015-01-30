@@ -72,9 +72,9 @@ public class IWD {
 				{
 					System.out.print(rs.getObject(i)+" - ");
 				}
+				System.out.println();
 				
 			}
-			System.out.print("\n");
 			rs.close();
 		}
 		catch(Exception e)
@@ -127,4 +127,77 @@ public class IWD {
 	{
 		return this.defaultPath;
 	}
+	
+	public Harbor[] readHarborData(String path)
+	{
+		BufferedReader br = null;
+		String line = "";
+		String csvSplitBy = ",";
+		Harbor[] data = null;
+		try{
+			data = new Harbor[this.countLines(path)+1];
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		 
+		try{
+			br = new BufferedReader(new FileReader(path));
+			int i = 0;
+			while((line=br.readLine()) != null){
+				String[] lineData = line.split(csvSplitBy);
+				data[i] = new Harbor(lineData[0],Integer.parseInt(lineData[1]),Double.parseDouble(lineData[2]),Double.parseDouble(lineData[3]),
+						Double.parseDouble(lineData[4]),Double.parseDouble(lineData[5]));
+				i++;
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally{
+			if(br!=null)
+			{
+				try {
+					br.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return data;
+	}
+	
+	private int countLines(String path) throws IOException
+	{ 
+		InputStream is = new BufferedInputStream(new FileInputStream(path));
+		try {
+			
+			
+		    byte[] c = new byte[1024];
+		    int count = 0;
+		    int readChars = 0;
+		    boolean empty = true;
+		    while ((readChars = is.read(c)) != -1) {
+			    empty = false;
+			    for (int i = 0; i < readChars; ++i) {
+			    	if (c[i] == '\n') {
+			                ++count;
+			            }
+			        }
+			    }
+	        	return (count == 0 && !empty) ? 1 : count;
+	    } 
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return 0;
+		}
+		finally{
+			is.close();
+	    }
+	}
+
 }

@@ -8,8 +8,7 @@ public class Vessel {
 	private double longitude;
 	private double latitude;
 	private int riverkm;
-	private int sog;
-	private char upRiver;
+	private String upRiver;
 	private String shipName;
 	private int vesselType;
 	private int hazardCargo;
@@ -17,7 +16,13 @@ public class Vessel {
 	private int length;
 	private int beam;
 	
-	public Vessel(int id, Timestamp time, int mmsi, double longitude, double latitude, int riverkm,int sog, char upRiver, 
+	private double sogAvg;
+	private Timestamp arrivalTime;
+	private long travelTime;
+	private int distance;
+	
+	
+	public Vessel(int id, Timestamp time, int mmsi, double longitude, double latitude, int riverkm, String upRiver, 
 			String shipName, int vesselType, int hazardCargo, int draught,int length, int beam)
 			{
 		this.id = id;
@@ -26,7 +31,6 @@ public class Vessel {
 		this.longitude = longitude;
 		this.latitude = latitude;
 		this.riverkm = riverkm;
-		this.sog = sog;
 		this.upRiver = upRiver;
 		this.shipName = shipName;
 		this.vesselType = vesselType;
@@ -36,5 +40,46 @@ public class Vessel {
 		this.beam = beam;
 			}
 	
+	@Override
+	public String toString()
+	{
+		return ""+this.id+this.time+this.mmsi+this.longitude+this.latitude+this.riverkm+this.upRiver+this.shipName+this.vesselType+this.hazardCargo+this.draught+this.length+this.beam;
+	}
 	
+	public void writeToFile()
+	{
+		//write Data to .csv File
+	}
+	
+	public boolean inHarbor(Harbor[] harbor)
+	{
+		return true;
+	}
+	
+	public boolean inCountry(double longitude, double latitude)
+	{
+		/*
+		 * 48.590910, 13.500866 - Achleiten/Passau
+		 * 48.590910, 17.072103 - somewhere in Slovakia
+		 * 48.019426, 17.072103 - Bratislava/Petrzalka
+		 * 48.019426, 13.500866 - somehwere in Upper Austria
+		 * Draws a rectangle that contains all of Austria's part of the Danube
+		*/
+		if(latitude > 48.019426 && latitude < 48.590910 && longitude > 13.500866 && longitude < 17.072103)
+		{
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	public double getLongitude()
+	{
+		return this.longitude;
+	}
+	
+	public double getLatitude()
+	{
+		return this.latitude;
+	}
 }
