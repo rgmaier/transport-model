@@ -1,5 +1,6 @@
 import java.sql.*;
 import java.io.*;
+import java.util.*;
 
 public class IWD {
 	private final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
@@ -89,6 +90,7 @@ public class IWD {
 	{
 		this.filePath = path;
 	}
+	
 	public void writeToFile(String content)
 	{
 		try{
@@ -162,7 +164,6 @@ public class IWD {
 				try {
 					br.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -185,10 +186,10 @@ public class IWD {
 			    for (int i = 0; i < readChars; ++i) {
 			    	if (c[i] == '\n') {
 			                ++count;
-			            }
 			        }
 			    }
-	        	return (count == 0 && !empty) ? 1 : count;
+		    }
+	        return (count == 0 && !empty) ? 1 : count;
 	    } 
 		catch(Exception e)
 		{
@@ -199,5 +200,26 @@ public class IWD {
 			is.close();
 	    }
 	}
-
+	
+	public ArrayList<Integer> getMMSI()
+	{
+		ArrayList<Integer> data = new ArrayList<Integer>();
+		
+		ResultSet result = this.query("SELECT userId FROM shipdatadump GROUP BY userId;");
+		
+		try{
+			while(result.next())
+			{
+				data.add(result.getInt(1));
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+				
+		
+		return data;
+	}
+	
 }

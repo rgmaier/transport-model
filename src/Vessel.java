@@ -53,7 +53,17 @@ public class Vessel {
 	
 	public boolean inHarbor(Harbor[] harbor)
 	{
-		return true;
+		for(int i=0;i<harbor.length;i++)
+		{
+			if(this.longitude>harbor[i].getMinLong()&&this.longitude<harbor[i].getMaxLong())
+			{
+				if(this.latitude>harbor[i].getMinLat()&&this.latitude<harbor[i].getMaxLat())
+				{
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	public boolean inCountry(double longitude, double latitude)
