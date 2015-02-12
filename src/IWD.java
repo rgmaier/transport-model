@@ -4,7 +4,8 @@ import java.util.*;
 
 public class IWD {
 	private final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-	private final String DB_URL = "jdbc:mysql://localhost/viadonau";
+	private final String DB_URL = "jdbc:mysql://viadonau.c4uwda0xtsg4.eu-central-1.rds.amazonaws.com:3306/?user=rgmaier";
+	
 	
 	private String user;
 	private String pass;
@@ -12,7 +13,7 @@ public class IWD {
 	private Connection conn;
 	private Statement stmt;
 	private String filePath = null;
-	private String defaultPath = "C:/default.txt";
+	private String defaultPath = "";
 	
 	
 	public IWD(String usr, String pw)
@@ -97,7 +98,7 @@ public class IWD {
 			File file = null;
 			if(this.filePath == null)
 			{
-				file = new File(this.defaultPath);
+				file = new File(this.defaultPath+"default.txt");
 			}
 			else{
 				file = new File(this.filePath);
