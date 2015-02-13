@@ -4,7 +4,7 @@ import java.util.*;
 
 public class IWD {
 	private final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-	private final String DB_URL = "jdbc:mysql://viadonau.c4uwda0xtsg4.eu-central-1.rds.amazonaws.com:3306/?user=rgmaier";
+	private final String DB_URL = "jdbc:mysql://localhost:3306/viadonau";
 	
 	
 	private String user;
@@ -13,7 +13,6 @@ public class IWD {
 	private Connection conn;
 	private Statement stmt;
 	private String filePath = null;
-	private String defaultPath = "";
 	
 	
 	public IWD(String usr, String pw)
@@ -64,29 +63,6 @@ public class IWD {
 		}
 	}
 	
-	public void printResult(String sql)
-	{
-		try{
-			ResultSet rs = this.query(sql);
-			while(rs.next())
-			{
-				for(int i = 1; i<=23;i++)
-				{
-					System.out.print(rs.getObject(i)+" - ");
-				}
-				System.out.println();
-				
-			}
-			rs.close();
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-		
-		
-	}
-
 	public void setFilePath(String path)
 	{
 		this.filePath = path;
@@ -98,7 +74,7 @@ public class IWD {
 			File file = null;
 			if(this.filePath == null)
 			{
-				file = new File(this.defaultPath+"default.txt");
+				file = new File("default.txt");
 			}
 			else{
 				file = new File(this.filePath);
@@ -121,31 +97,16 @@ public class IWD {
 		}
 	}
 	
-	public void setDefaultPath(String path)
-	{
-		this.defaultPath = path;
-	}
-	
-	public String getDefaultPath(String path)
-	{
-		return this.defaultPath;
-	}
-	
 	public Harbor[] readHarborData(String path)
 	{
 		BufferedReader br = null;
 		String line = "";
 		String csvSplitBy = ",";
 		Harbor[] data = null;
+	 
 		try{
 			data = new Harbor[this.countLines(path)+1];
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-		 
-		try{
+			
 			br = new BufferedReader(new FileReader(path));
 			int i = 0;
 			while((line=br.readLine()) != null){
@@ -172,12 +133,80 @@ public class IWD {
 		return data;
 	}
 	
+	public Lock[] readLockData(String path)
+	{
+		BufferedReader br = null;
+		String line = "";
+		String csvSplitBy = ",";
+		Lock[] data = null;
+		
+		try{
+			data = new Lock[this.countLines(path)+1];
+			
+			br = new BufferedReader(new FileReader(path));
+			int i = 0;
+			while((line=br.readLine())!=null){
+				String[] lineData = line.split(csvSplitBy);
+				data[i] = new Lock(Timestamp.valueOf(lineData[2]), Timestamp.valueOf(lineData[3]), Integer.parseInt(lineData[1]), lineData[0]);
+				i++;
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally{
+			if(br!=null)
+			{
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return data;
+	}
+	
+	public WaterLevel[] readWaterData(String path)
+	{
+		BufferedReader br = null;
+		String line = "";
+		String csvSplitBy = ",";
+		WaterLevel[] data = null;
+		
+		try{
+			data = new WaterLevel[this.countLines(path)+1];
+			
+			br = new BufferedReader(new FileReader(path));
+			int i = 0;
+			while((line=br.readLine())!=null){
+				String[] lineData = line.split(csvSplitBy);
+				data[i] = new WaterLevel(Timestamp.valueOf(lineData[0]), Integer.parseInt(lineData[3]), lineData[0], Integer.parseInt(lineData[1]));
+				i++;
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally{
+			if(br!=null)
+			{
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return data;
+	}
+	
 	private int countLines(String path) throws IOException
 	{ 
 		InputStream is = new BufferedInputStream(new FileInputStream(path));
-		try {
-			
-			
+		try {	
 		    byte[] c = new byte[1024];
 		    int count = 0;
 		    int readChars = 0;
@@ -206,12 +235,13 @@ public class IWD {
 	{
 		ArrayList<Integer> data = new ArrayList<Integer>();
 		
-		ResultSet result = this.query("SELECT userId FROM shipdatadump GROUP BY userId;");
+		ResultSet result = this.query("SELECT userId FROM viadonau.shipdatadump GROUP BY userId;");
 		
 		try{
 			while(result.next())
 			{
 				data.add(result.getInt(1));
+				System.out.println("Added");
 			}
 		}
 		catch(Exception e)

@@ -14,22 +14,32 @@ public class Thesis {
 		input.close();
 		
 		Harbor[] data = thesis.readHarborData("Harbor.csv");
-
+		System.out.println(data.length);
+		
+		Lock[] lData = thesis.readLockData("Lock.csv");
+		
+		for(int i = 0; i<lData.length;i++)
+		{
+			System.out.println(lData[i]);
+		}
+		
+		WaterLevel[] wData = thesis.readWaterData("Water.csv");
 		
 		DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 		try{
 			ArrayList<Integer> mmsi = new ArrayList<Integer>();
-			//mmsi=test.getMMSI();
+			mmsi=thesis.getMMSI();
+			
 			Vessel ship = null;
-			mmsi.add(1);
+
 			int count = 0;
 			
 			while(mmsi.size()>0)
 			{
 				System.out.println(mmsi.size());
 				System.out.println(dateFormat.format(new Date()));
-				//ResultSet r = test.query("SELECT id, timeStampLocal, userId, longitude, latitude, riverkm, upriver, shipName, vesselType, hazardCargo, draught, length, beam FROM shipdatadump WHERE userId ="+mmsi.get(mmsi.size()-1)+";");
-				ResultSet r = thesis.query("SELECT id, timeStampLocal, userId, longitude, latitude, riverkm, upriver, shipName, vesselType, hazardCargo, draught, length, beam FROM viadonau.shipdatadump WHERE userId =244660182;");
+				ResultSet r = thesis.query("SELECT id, timeStampLocal, userId, longitude, latitude, riverkm, upriver, shipName, vesselType, hazardCargo, draught, length, beam FROM viadonau.shipdatadump WHERE userId ="+mmsi.get(mmsi.size()-1)+";");
+				//ResultSet r = thesis.query("SELECT id, timeStampLocal, userId, longitude, latitude, riverkm, upriver, shipName, vesselType, hazardCargo, draught, length, beam FROM shipdatadump WHERE userId =244660182;");
 				
 				if (r.last()) {
 					  count = r.getRow();

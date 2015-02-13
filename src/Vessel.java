@@ -2,7 +2,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 
 
 public class Vessel {
@@ -28,6 +30,12 @@ public class Vessel {
 	private double arrLat;
 	private int arrId;
 	
+	private String category;
+	
+	private int[][] lockStatus; //1st dimension are all 9 locks, 2nd dimension are status chamber at start of voyage, 1hr before, when in range and 1hr after
+	private int[][] waterLevel; //1st dim are all 9 water level points, 2nd dimension are water level at start of voyage, 1hr before, when in range and 1hr after
+	//something weathery comebacklater TODO
+	
 	public boolean wasInCountry;
 	public boolean wasInHarbor;
 	
@@ -48,13 +56,9 @@ public class Vessel {
 		this.draught = draught;
 		this.length = length;
 		this.beam = beam;
+		this.lockStatus = new int[18][4];
+		this.waterLevel = new int[18][4];
 			}
-	
-	@Override
-	public String toString()
-	{
-		return ""+this.id+this.time+this.mmsi+this.longitude+this.latitude+this.riverkm+this.upRiver+this.shipName+this.vesselType+this.hazardCargo+this.draught+this.length+this.beam;
-	}
 	
 	public void writeToCSV(String path)
 	{
@@ -80,10 +84,10 @@ public class Vessel {
 		data+= this.arrLong+",";
 		data+= this.arrLat;
 		
-		/*if(this.riverkm>0){
+		if(this.riverkm>0){
 			if(this.travelTime<1000||this.distance<1000){
 			}		
-			else{*/
+			else{
 				try{
 					File file = new File(path);
 					
@@ -103,8 +107,8 @@ public class Vessel {
 				{
 					e.printStackTrace();
 				}
-			//}
-		//}
+			}
+		}
 		
 	}
 	
@@ -141,10 +145,10 @@ public class Vessel {
 	public boolean inCountry()
 	{
 		/*
-		 * 48.590910, 13.500866 - Achleiten/Passau
+		 * 48.590910, 13.5029 - Achleiten/Passau
 		 * 48.590910, 17.072103 - somewhere in Slovakia
 		 * 48.019426, 17.072103 - Bratislava/Petrzalka
-		 * 48.019426, 13.500866 - somehwere in Upper Austria
+		 * 48.019426, 13.5029 - somehwere in Upper Austria
 		 * Draws a rectangle that contains all of Austria's part of the Danube
 		*/
 		if(this.latitude > 48.019426 && this.latitude < 48.590910 && this.longitude > 13.500866 && this.longitude < 17.072103)
@@ -228,5 +232,52 @@ public class Vessel {
 	public Timestamp getTime()
 	{
 		return this.time;
+	}
+	
+	public void determineCategory()
+	{
+		//TODO
+	}
+	
+	public void setLockStatus(Lock[] data)
+	{
+		//TODO
+		
+		for(int i = 0; i<data.length;i++)
+		{
+			
+		}
+		
+		
+	}
+	
+	public void setWaterLevel(WaterLevel[] data, IWD operation)
+	{
+		//TODO
+		ArrayList<Integer> locations = new ArrayList<Integer>();
+		locations.add(2223);
+		locations.add(2144);
+		locations.add(2111);
+		locations.add(2079);
+		locations.add(2015);
+		locations.add(2009);
+		locations.add(1941);
+		locations.add(1895);
+		locations.add(1879);
+		
+		int i = 0;
+		
+		while(locations.size()>0)
+		{
+			ResultSet r = operation.query("SELECT timeStampLocal FROM viadonau.shipdatadump WHERE userId ="+this.mmsi+" AND riverkm = "+locations.get(locations.size()-1)+
+					"AND (id BETWEEN "+this.id+" AND "+this.arrId+") LIMIT 0,1;");
+			
+			
+			
+			locations.remove(locations.size()-1);
+		}
+		
+		
+		
 	}
 }
