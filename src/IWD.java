@@ -173,17 +173,58 @@ public class IWD {
 		BufferedReader br = null;
 		String line = "";
 		String csvSplitBy = ",";
-		WaterLevel[] data = null;
+		
+		String[] files = {"WAchleiten.dat","WDuernstein.dat","WGrein.dat","WKienstock.dat","WKorneuburg.dat","WMauthausen.dat","WThebnerstrassl.dat","WWildungsmauer.dat","WWilhering.dat"};
+		
+		WaterLevel[] data = new WaterLevel[files.length];
+		
+		for(int i = 0; i<files.length;i++)
+		{
+			try{
+				br = new BufferedReader(new FileReader(path+files[i]));
+				
+				line=br.readLine();
+				String[] lineData = line.split(csvSplitBy);
+				data[i] = new WaterLevel(lineData[2], Integer.parseInt(lineData[3]));
+				data[i].add(Timestamp.valueOf(lineData[0]),Integer.parseInt(lineData[1]));
+				
+				while((line=br.readLine())!=null){
+					lineData = line.split(csvSplitBy);
+					data[i].add(Timestamp.valueOf(lineData[0]),Integer.parseInt(lineData[1]));
+				}
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			finally{
+				if(br!=null)
+				{
+					try {
+						br.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		
+		return data;
+	}
+	
+	public HashMap<Integer,String> readLocations(String path)
+	{
+		HashMap<Integer,String> data = new HashMap<Integer,String>();
+		
+		BufferedReader br = null;
+		String line = "";
+		String csvSplitBy = ",";
 		
 		try{
-			data = new WaterLevel[this.countLines(path)+1];
-			
 			br = new BufferedReader(new FileReader(path));
-			int i = 0;
 			while((line=br.readLine())!=null){
 				String[] lineData = line.split(csvSplitBy);
-				data[i] = new WaterLevel(Timestamp.valueOf(lineData[0]), Integer.parseInt(lineData[3]), lineData[0], Integer.parseInt(lineData[1]));
-				i++;
+				data.put(Integer.parseInt(lineData[0]),lineData[1]);
 			}
 		}
 		catch(Exception e)
@@ -200,6 +241,7 @@ public class IWD {
 				}
 			}
 		}
+		
 		return data;
 	}
 	
@@ -252,5 +294,4 @@ public class IWD {
 		
 		return data;
 	}
-	
 }

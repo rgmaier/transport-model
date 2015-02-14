@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class Vessel {
@@ -35,6 +36,8 @@ public class Vessel {
 	private int[][] lockStatus; //1st dimension are all 9 locks, 2nd dimension are status chamber at start of voyage, 1hr before, when in range and 1hr after
 	private int[][] waterLevel; //1st dim are all 9 water level points, 2nd dimension are water level at start of voyage, 1hr before, when in range and 1hr after
 	//something weathery comebacklater TODO
+	
+	private String voyage;
 	
 	public boolean wasInCountry;
 	public boolean wasInHarbor;
@@ -151,7 +154,7 @@ public class Vessel {
 		 * 48.019426, 13.5029 - somehwere in Upper Austria
 		 * Draws a rectangle that contains all of Austria's part of the Danube
 		*/
-		if(this.latitude > 48.019426 && this.latitude < 48.590910 && this.longitude > 13.500866 && this.longitude < 17.072103)
+		if(this.latitude > 48.019426 && this.latitude < 48.590910 && this.longitude > 13.5029 && this.longitude < 17.072103)
 		{
 			return true;
 		}
@@ -163,13 +166,13 @@ public class Vessel {
 	public boolean inCountry(double longitude, double latitude)
 	{
 		/*
-		 * 48.590910, 13.500866 - Achleiten/Passau
+		 * 48.590910, 13.5029 - Achleiten/Passau
 		 * 48.590910, 17.072103 - somewhere in Slovakia
 		 * 48.019426, 17.072103 - Bratislava/Petrzalka
 		 * 48.019426, 13.500866 - somehwere in Upper Austria
 		 * Draws a rectangle that contains all of Austria's part of the Danube
 		*/
-		if(latitude > 48.019426 && latitude < 48.590910 && longitude > 13.500866 && longitude < 17.072103)
+		if(latitude > 48.019426 && latitude < 48.590910 && longitude > 13.5029 && longitude < 17.072103)
 		{
 			return true;
 		}
@@ -219,7 +222,7 @@ public class Vessel {
 		
 	}
 	
-	public void cleanUp(int arrivalRiverKm, Timestamp arrival, Double arrLong, Double arrLat, int arrId)
+	public void cleanUp(int arrivalRiverKm, Timestamp arrival, Double arrLong, Double arrLat, int arrId, IWD operation)
 	{
 		this.arrLat = arrLat;
 		this.arrLong = arrLong;
@@ -227,6 +230,9 @@ public class Vessel {
 		this.arrivalTime(arrival);
 		this.sogAvg();
 		this.arrId = arrId;
+		WaterLevel[] wData = operation.readWaterData("IWD/");
+		setWaterLevel(wData,operation);
+		this.setVoyage(operation);
 	}
 	
 	public Timestamp getTime()
@@ -253,31 +259,31 @@ public class Vessel {
 	
 	public void setWaterLevel(WaterLevel[] data, IWD operation)
 	{
-		//TODO
-		ArrayList<Integer> locations = new ArrayList<Integer>();
-		locations.add(2223);
-		locations.add(2144);
-		locations.add(2111);
-		locations.add(2079);
-		locations.add(2015);
-		locations.add(2009);
-		locations.add(1941);
-		locations.add(1895);
-		locations.add(1879);
 		
-		int i = 0;
 		
-		while(locations.size()>0)
+	}
+	
+	public void setVoyage(IWD operation)
+	{
+		HashMap<Integer,String> data = operation.readLocations("POI.csv");
+		
+		String temp[] = new String[2];
+		
+		if(this.upRiver.equals("t"))
 		{
-			ResultSet r = operation.query("SELECT timeStampLocal FROM viadonau.shipdatadump WHERE userId ="+this.mmsi+" AND riverkm = "+locations.get(locations.size()-1)+
-					"AND (id BETWEEN "+this.id+" AND "+this.arrId+") LIMIT 0,1;");
-			
-			
-			
-			locations.remove(locations.size()-1);
+			temp[1] = data.get(this.riverkm);
+			temp[0] = data.get(this.riverkm-this.distance/1000);
 		}
-		
-		
-		
+		else{
+			temp[0] = data.get(this.riverkm);
+			temp[1] = data.get(this.riverkm+this.distance/1000);
+		}
+	}
+	
+	private long roundToHour(long time)
+	{
+		time += 1800000;
+		time = time/(3600000);
+		return time*3600000;
 	}
 }

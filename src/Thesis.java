@@ -7,29 +7,31 @@ import java.util.Date;
 
 public class Thesis {
 
+	//Daten einlesen einmal und dann nur übergeben, cleanup funktion wieder aufspalten.
+	
 	public static void main(String[] args) {
 
 		Scanner input = new Scanner(System.in);
-		IWD thesis = new IWD(input.next(),input.next());
+		String user = input.next();
+		String pw = input.next();
+		IWD thesis = new IWD(user, pw);
+		IWD results = new IWD(user, pw);
 		input.close();
 		
 		Harbor[] data = thesis.readHarborData("Harbor.csv");
 		System.out.println(data.length);
 		
 		Lock[] lData = thesis.readLockData("Lock.csv");
+				
+		WaterLevel[] wData = thesis.readWaterData("IWD/");
 		
-		for(int i = 0; i<lData.length;i++)
-		{
-			System.out.println(lData[i]);
-		}
-		
-		WaterLevel[] wData = thesis.readWaterData("Water.csv");
+		System.out.println(wData[0].getHashmap().size());
 		
 		DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 		try{
 			ArrayList<Integer> mmsi = new ArrayList<Integer>();
-			mmsi=thesis.getMMSI();
-			
+			//mmsi=thesis.getMMSI();
+			mmsi.add(1);
 			Vessel ship = null;
 
 			int count = 0;
@@ -38,8 +40,8 @@ public class Thesis {
 			{
 				System.out.println(mmsi.size());
 				System.out.println(dateFormat.format(new Date()));
-				ResultSet r = thesis.query("SELECT id, timeStampLocal, userId, longitude, latitude, riverkm, upriver, shipName, vesselType, hazardCargo, draught, length, beam FROM viadonau.shipdatadump WHERE userId ="+mmsi.get(mmsi.size()-1)+";");
-				//ResultSet r = thesis.query("SELECT id, timeStampLocal, userId, longitude, latitude, riverkm, upriver, shipName, vesselType, hazardCargo, draught, length, beam FROM shipdatadump WHERE userId =244660182;");
+				//ResultSet r = thesis.query("SELECT id, timeStampLocal, userId, longitude, latitude, riverkm, upriver, shipName, vesselType, hazardCargo, draught, length, beam FROM viadonau.shipdatadump WHERE userId ="+mmsi.get(mmsi.size()-1)+";");
+				ResultSet r = thesis.query("SELECT id, timeStampLocal, userId, longitude, latitude, riverkm, upriver, shipName, vesselType, hazardCargo, draught, length, beam FROM shipdatadump WHERE userId =244660182;");
 				
 				if (r.last()) {
 					  count = r.getRow();
@@ -76,7 +78,7 @@ public class Thesis {
 						}
 						else if(r.isLast()){
 				
-							ship.cleanUp(r.getInt(6),r.getTimestamp(2),r.getDouble(4),r.getDouble(5),r.getInt(1));
+							ship.cleanUp(r.getInt(6),r.getTimestamp(2),r.getDouble(4),r.getDouble(5),r.getInt(1), results);
 							ship.writeToCSV("Data.csv");
 						}
 						else{
@@ -86,7 +88,7 @@ public class Thesis {
 										if(r.getTimestamp(2).getTime()-ship.getTime().getTime()>180000){
 											if(r.getInt(6)>1000)
 											{
-												ship.cleanUp(r.getInt(6),r.getTimestamp(2),r.getDouble(4),r.getDouble(5),r.getInt(1));
+												ship.cleanUp(r.getInt(6),r.getTimestamp(2),r.getDouble(4),r.getDouble(5),r.getInt(1), results);
 												ship.writeToCSV("Data.csv");
 												ship = null;
 											}
@@ -101,19 +103,19 @@ public class Thesis {
 										}
 									}
 									else{
-										ship.cleanUp(r.getInt(6),r.getTimestamp(2),r.getDouble(4),r.getDouble(5),r.getInt(1));
+										ship.cleanUp(r.getInt(6),r.getTimestamp(2),r.getDouble(4),r.getDouble(5),r.getInt(1), results);
 										ship.writeToCSV("Data.csv");
 										ship = null;
 									}
 								}
 								else{
 									//clean up here again to avoid 0000000000
-									ship.cleanUp(r.getInt(6),r.getTimestamp(2),r.getDouble(4),r.getDouble(5),r.getInt(1));
+									ship.cleanUp(r.getInt(6),r.getTimestamp(2),r.getDouble(4),r.getDouble(5),r.getInt(1), results);
 								}
 							}
 							else{
 								if(ship.wasInCountry){
-									ship.cleanUp(r.getInt(6),r.getTimestamp(2),r.getDouble(4),r.getDouble(5),r.getInt(1));
+									ship.cleanUp(r.getInt(6),r.getTimestamp(2),r.getDouble(4),r.getDouble(5),r.getInt(1), results);
 									ship.writeToCSV("Data.csv");
 									ship = null;
 								}

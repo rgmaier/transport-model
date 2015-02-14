@@ -1,24 +1,18 @@
 import java.sql.Timestamp;
+import java.util.HashMap;
 
 
 public class WaterLevel {
-	Timestamp time;
+
 	int riverkm;
 	String location;
-	int level; //in cm
+	HashMap<Timestamp, Integer> map;
 	
-	public WaterLevel(Timestamp time, int riverkm, String location, int level){
-		
-		this.time = time;
+	public WaterLevel(String location,int riverkm){
 		this.riverkm = riverkm;
 		this.location = location;
-		this.level = level;
-	}
-	
-	@Override
-	public String toString()
-	{
-		return this.location+"-"+this.riverkm+"-"+this.time+"-"+this.level;
+		this.map = new HashMap<Timestamp, Integer>();
+		
 	}
 	
 	public String getLocation()
@@ -31,13 +25,13 @@ public class WaterLevel {
 		return this.riverkm;
 	}
 	
-	public Timestamp time()
+	public void add(Timestamp time, int i)
 	{
-		return this.time;
+		map.put(time, new Integer(i));
 	}
 	
-	public int level()
+	public HashMap<Timestamp, Integer> getHashmap()
 	{
-		return this.level;
+		return this.map;
 	}
 }
