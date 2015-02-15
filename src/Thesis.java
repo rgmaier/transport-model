@@ -21,10 +21,8 @@ public class Thesis {
 		WaterLevel[] wData = thesis.readWaterData("IWD/");
 		HashMap<Integer,String> pData = thesis.readLocations("POI.csv");
 		
-		System.out.println(wData[0].getHashmap().keySet());
-		
-		DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-		
+		DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss:SSS");
+				
 		try{
 			ArrayList<Integer> mmsi = new ArrayList<Integer>();
 			//mmsi=thesis.getMMSI();
@@ -90,6 +88,7 @@ public class Thesis {
 												ship.cleanUp(r.getInt(6),r.getTimestamp(2),r.getDouble(4),r.getDouble(5),r.getInt(1), results);
 												ship.setVoyage(pData);
 												ship.setWaterLevel(wData,results);
+
 												ship.writeToCSV("Data.csv");
 												ship = null;
 											}
@@ -107,15 +106,17 @@ public class Thesis {
 										ship.cleanUp(r.getInt(6),r.getTimestamp(2),r.getDouble(4),r.getDouble(5),r.getInt(1), results);
 										ship.setVoyage(pData);
 										ship.setWaterLevel(wData,results);
+
 										ship.writeToCSV("Data.csv");
 										ship = null;
 									}
 								}
 								else{
 									//clean up here again to avoid 0000000000
-									ship.cleanUp(r.getInt(6),r.getTimestamp(2),r.getDouble(4),r.getDouble(5),r.getInt(1), results);
+									/*ship.cleanUp(r.getInt(6),r.getTimestamp(2),r.getDouble(4),r.getDouble(5),r.getInt(1), results);
 									ship.setVoyage(pData);
 									ship.setWaterLevel(wData,results);
+									System.out.println("Set water level");*/
 								}
 							}
 							else{
@@ -123,6 +124,7 @@ public class Thesis {
 									ship.cleanUp(r.getInt(6),r.getTimestamp(2),r.getDouble(4),r.getDouble(5),r.getInt(1), results);
 									ship.setVoyage(pData);
 									ship.setWaterLevel(wData,results);
+
 									ship.writeToCSV("Data.csv");
 									ship = null;
 								}

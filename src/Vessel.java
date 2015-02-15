@@ -60,7 +60,7 @@ public class Vessel {
 		this.length = length;
 		this.beam = beam;
 		this.lockStatus = new int[18][4];
-		this.waterLevel = new int[18][4];
+		this.waterLevel = new int[9][4];
 			}
 	
 	public void writeToCSV(String path)
@@ -279,32 +279,34 @@ public class Vessel {
 					  a.first();
 				}
 				
-				if(count > 0)
+				if(count >0)
 				{
 					a.getTimestamp(1).getTime();
 					long[] temp = new long[]{this.time.getTime(),a.getTimestamp(1).getTime()-3600000,a.getTimestamp(1).getTime(),a.getTimestamp(1).getTime()+3600000};
 					
 					for(int j = 0;j<this.waterLevel[i].length;j++)
 					{
-						this.waterLevel[i][j] = data[locations.size()-1].getHashmap().get(temp[j]);
+						this.waterLevel[i][j] = data[locations.size()-1].getHashmap().get(this.roundToHour(temp[j]));
+
 					}
 				}
-				else{
+				else if(count == 0){
 					//Fill array with -1;
-					this.waterLevel[i][0] = data[locations.size()-1].getHashmap().get(this.time.getTime());
+					this.waterLevel[i][0] = data[locations.size()-1].getHashmap().get(this.roundToHour(this.time.getTime()));
 					for(int j = 1;j<this.waterLevel[i].length;j++)
 					{
 						this.waterLevel[i][j] = -1;
 					}
 				}
-				i++;
+				
 			}
 			catch(Exception e)
 			{
 				e.printStackTrace();
 			}
+			i++;
+			locations.remove(locations.size()-1);
 		}
-		
 	}
 	
 	public void setVoyage(HashMap<Integer,String> data)
