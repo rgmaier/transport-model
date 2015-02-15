@@ -6,8 +6,6 @@ import java.util.*;
 import java.util.Date;
 
 public class Thesis {
-
-	//Daten einlesen einmal und dann nur übergeben, cleanup funktion wieder aufspalten.
 	
 	public static void main(String[] args) {
 
@@ -18,16 +16,15 @@ public class Thesis {
 		IWD results = new IWD(user, pw);
 		input.close();
 		
-		Harbor[] data = thesis.readHarborData("Harbor.csv");
-		System.out.println(data.length);
-		
+		Harbor[] data = thesis.readHarborData("Harbor.csv");		
 		Lock[] lData = thesis.readLockData("Lock.csv");
-				
 		WaterLevel[] wData = thesis.readWaterData("IWD/");
+		HashMap<Integer,String> pData = thesis.readLocations("POI.csv");
 		
-		System.out.println(wData[0].getHashmap().size());
+		System.out.println(wData[0].getHashmap().keySet());
 		
 		DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+		
 		try{
 			ArrayList<Integer> mmsi = new ArrayList<Integer>();
 			//mmsi=thesis.getMMSI();
@@ -79,6 +76,8 @@ public class Thesis {
 						else if(r.isLast()){
 				
 							ship.cleanUp(r.getInt(6),r.getTimestamp(2),r.getDouble(4),r.getDouble(5),r.getInt(1), results);
+							ship.setVoyage(pData);
+							ship.setWaterLevel(wData,results);
 							ship.writeToCSV("Data.csv");
 						}
 						else{
@@ -89,6 +88,8 @@ public class Thesis {
 											if(r.getInt(6)>1000)
 											{
 												ship.cleanUp(r.getInt(6),r.getTimestamp(2),r.getDouble(4),r.getDouble(5),r.getInt(1), results);
+												ship.setVoyage(pData);
+												ship.setWaterLevel(wData,results);
 												ship.writeToCSV("Data.csv");
 												ship = null;
 											}
@@ -104,6 +105,8 @@ public class Thesis {
 									}
 									else{
 										ship.cleanUp(r.getInt(6),r.getTimestamp(2),r.getDouble(4),r.getDouble(5),r.getInt(1), results);
+										ship.setVoyage(pData);
+										ship.setWaterLevel(wData,results);
 										ship.writeToCSV("Data.csv");
 										ship = null;
 									}
@@ -111,11 +114,15 @@ public class Thesis {
 								else{
 									//clean up here again to avoid 0000000000
 									ship.cleanUp(r.getInt(6),r.getTimestamp(2),r.getDouble(4),r.getDouble(5),r.getInt(1), results);
+									ship.setVoyage(pData);
+									ship.setWaterLevel(wData,results);
 								}
 							}
 							else{
 								if(ship.wasInCountry){
 									ship.cleanUp(r.getInt(6),r.getTimestamp(2),r.getDouble(4),r.getDouble(5),r.getInt(1), results);
+									ship.setVoyage(pData);
+									ship.setWaterLevel(wData,results);
 									ship.writeToCSV("Data.csv");
 									ship = null;
 								}
@@ -137,7 +144,7 @@ public class Thesis {
 		{
 			e.printStackTrace();
 		}
-		
+		System.out.println(dateFormat.format(new Date()));
 		thesis.close();
 
 	}

@@ -85,7 +85,16 @@ public class Vessel {
 		data+= this.distance+",";
 		data+= this.sogAvg+",";
 		data+= this.arrLong+",";
-		data+= this.arrLat;
+		data+= this.arrLat+",";
+		data+= this.voyage+",";
+		
+		for(int i = 0; i<this.waterLevel.length;i++)
+		{
+			for(int j = 0; j<this.waterLevel[i].length;j++)
+			{
+				data += this.waterLevel[i][j]+",";
+			}
+		}
 		
 		if(this.riverkm>0){
 			if(this.travelTime<1000||this.distance<1000){
@@ -230,19 +239,11 @@ public class Vessel {
 		this.arrivalTime(arrival);
 		this.sogAvg();
 		this.arrId = arrId;
-		WaterLevel[] wData = operation.readWaterData("IWD/");
-		setWaterLevel(wData,operation);
-		this.setVoyage(operation);
 	}
 	
 	public Timestamp getTime()
 	{
 		return this.time;
-	}
-	
-	public void determineCategory()
-	{
-		//TODO
 	}
 	
 	public void setLockStatus(Lock[] data)
@@ -259,14 +260,55 @@ public class Vessel {
 	
 	public void setWaterLevel(WaterLevel[] data, IWD operation)
 	{
+		ArrayList<Integer> locations = new ArrayList<Integer>();
 		
+		for(int i = 0; i<data.length;i++)
+		{
+			locations.add(data[i].getRiverkm());
+		}
+		int i = 0;
+		while(locations.size()>0)
+		{
+			ResultSet a = operation.query("SELECT timeStampLocal FROM viadonau.shipdatadump WHERE userId ="+this.mmsi+" AND riverkm = "+locations.get(locations.size()-1)+
+					" AND (id BETWEEN "+this.id+" AND "+this.arrId+") LIMIT 0,1;");
+			
+			try{
+				int count = 0;
+				if (a.last()) {
+					  count = a.getRow();
+					  a.first();
+				}
+				
+				if(count > 0)
+				{
+					a.getTimestamp(1).getTime();
+					long[] temp = new long[]{this.time.getTime(),a.getTimestamp(1).getTime()-3600000,a.getTimestamp(1).getTime(),a.getTimestamp(1).getTime()+3600000};
+					
+					for(int j = 0;j<this.waterLevel[i].length;j++)
+					{
+						this.waterLevel[i][j] = data[locations.size()-1].getHashmap().get(temp[j]);
+					}
+				}
+				else{
+					//Fill array with -1;
+					this.waterLevel[i][0] = data[locations.size()-1].getHashmap().get(this.time.getTime());
+					for(int j = 1;j<this.waterLevel[i].length;j++)
+					{
+						this.waterLevel[i][j] = -1;
+					}
+				}
+				i++;
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
 		
 	}
 	
-	public void setVoyage(IWD operation)
-	{
-		HashMap<Integer,String> data = operation.readLocations("POI.csv");
-		
+	public void setVoyage(HashMap<Integer,String> data)
+	{		
 		String temp[] = new String[2];
 		
 		if(this.upRiver.equals("t"))
@@ -278,6 +320,8 @@ public class Vessel {
 			temp[0] = data.get(this.riverkm);
 			temp[1] = data.get(this.riverkm+this.distance/1000);
 		}
+		
+		this.voyage = temp[0]+temp[1];
 	}
 	
 	private long roundToHour(long time)

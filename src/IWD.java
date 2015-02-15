@@ -186,11 +186,11 @@ public class IWD {
 				line=br.readLine();
 				String[] lineData = line.split(csvSplitBy);
 				data[i] = new WaterLevel(lineData[2], Integer.parseInt(lineData[3]));
-				data[i].add(Timestamp.valueOf(lineData[0]),Integer.parseInt(lineData[1]));
+				data[i].add(Timestamp.valueOf(lineData[0]).getTime(),Integer.parseInt(lineData[1]));
 				
 				while((line=br.readLine())!=null){
 					lineData = line.split(csvSplitBy);
-					data[i].add(Timestamp.valueOf(lineData[0]),Integer.parseInt(lineData[1]));
+					data[i].add(Timestamp.valueOf(lineData[0]).getTime(),Integer.parseInt(lineData[1]));
 				}
 			}
 			catch(Exception e)
@@ -293,5 +293,10 @@ public class IWD {
 				
 		
 		return data;
+	}
+	
+	public HashMap<String,WaterLevel[]> prepareWaterLevel()
+	{
+		return null;
 	}
 }
