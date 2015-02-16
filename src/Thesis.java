@@ -17,9 +17,11 @@ public class Thesis {
 		input.close();
 		
 		Harbor[] data = thesis.readHarborData("Harbor.csv");		
-		Lock[] lData = thesis.readLockData("Lock.csv");
+		HashMap<Integer,ArrayList<Lock>> lData = thesis.readLockData("IWD/");
 		WaterLevel[] wData = thesis.readWaterData("IWD/");
 		HashMap<Integer,String> pData = thesis.readLocations("POI.csv");
+		
+		System.out.println(lData.get(1921).get(0).getLocation());
 		
 		DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss:SSS");
 				

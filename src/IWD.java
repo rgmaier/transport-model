@@ -133,38 +133,50 @@ public class IWD {
 		return data;
 	}
 	
-	public Lock[] readLockData(String path)
+	public HashMap<Integer,ArrayList<Lock>> readLockData(String path)
 	{
 		BufferedReader br = null;
 		String line = "";
 		String csvSplitBy = ",";
-		Lock[] data = null;
 		
-		try{
-			data = new Lock[this.countLines(path)+1];
-			
-			br = new BufferedReader(new FileReader(path));
-			int i = 0;
-			while((line=br.readLine())!=null){
-				String[] lineData = line.split(csvSplitBy);
-				data[i] = new Lock(Timestamp.valueOf(lineData[2]), Timestamp.valueOf(lineData[3]), Integer.parseInt(lineData[1]), lineData[0]);
-				i++;
-			}
-		}
-		catch(Exception e)
+		ArrayList<Lock> classes = null;
+		HashMap<Integer,ArrayList<Lock>> data = new HashMap<Integer,ArrayList<Lock>>();
+		
+		int tempRiverKm = 0;
+		
+		String[] files = {"SAbwinden.dat","SAschach.dat","SFreudenau.dat","SGreifenstein.dat","SMelk.dat","SOttensheim.dat","SPersenbeug.dat","SWallsee.dat"};
+		
+		for(int i = 0; i<files.length;i++)
 		{
-			e.printStackTrace();
-		}
-		finally{
-			if(br!=null)
+			classes  = new ArrayList<Lock>();
+			try{
+				br = new BufferedReader(new FileReader(path+files[i]));
+
+				while((line=br.readLine()) != null){
+					String[]lineData = line.split(csvSplitBy);
+					tempRiverKm = Integer.parseInt(lineData[2]);
+					classes.add(new Lock(Timestamp.valueOf(lineData[3]),Timestamp.valueOf(lineData[4]),Integer.parseInt(lineData[2]),lineData[0],lineData[1]));
+				}
+				data.put(tempRiverKm,classes);
+			}
+			catch(Exception e)
 			{
-				try {
-					br.close();
-				} catch (IOException e) {
-					e.printStackTrace();
+				e.printStackTrace();
+			}
+			finally{
+				if(br!=null)
+				{
+					try {
+						br.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
 			}
+		
 		}
+		
+		
 		return data;
 	}
 	
