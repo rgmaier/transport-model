@@ -3,9 +3,9 @@ import java.util.HashMap;
 
 public class WaterLevel {
 
-	int riverkm;
-	String location;
-	HashMap<Long, Integer> map;
+	private int riverkm;
+	private String location;
+	private HashMap<Long, Integer> map;
 	
 	public WaterLevel(String location,int riverkm){
 		this.riverkm = riverkm;
