@@ -21,7 +21,7 @@ public class Lock {
 	@Override
 	public String toString()
 	{
-		return this.location+"-"+this.riverkm+"-"+this.startMaintenance+"-"+this.endMaintenance;
+		return this.location+"-"+this.side+"-"+this.riverkm+"-"+this.startMaintenance+"-"+this.endMaintenance;
 	}
 	
 	public String getLocation()

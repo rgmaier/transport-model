@@ -57,7 +57,7 @@ public class Vessel {
 		this.draught = draught;
 		this.length = length;
 		this.beam = beam;
-		this.lockStatus = new int[18][4];
+		this.lockStatus = new int[16][4];
 		this.waterLevel = new int[9][4];
 			}
 	
@@ -259,6 +259,7 @@ public class Vessel {
 		for(int key : data.keySet())
 		{
 			locations.add(key);
+			locations.add(key);
 		}
 		
 		for(int i = 0;locations.size()>0;i++,locations.remove(locations.size()-1))
@@ -326,50 +327,41 @@ public class Vessel {
 					{
 						for(Lock l : data.get(locations.get(locations.size()-1)))
 						{
-							if(this.time.getTime()>l.startMaintenance() && this.time.getTime()<l.endMaintenance())
+							if(l.getSide().equals("LK"))
 							{
-								if(l.getSide().equals("LK"))
+								if(this.time.getTime()>l.startMaintenance() && this.time.getTime()<l.endMaintenance())
 								{
 									lockStatus[i][0] = 1;
-									for(int j = 1; j<lockStatus[i].length;j++)
-									{
-										lockStatus[i][j] = -1;
-									}
+												
 								}
-							}
-							else{
-								if(l.getSide().equals("LK"))
-								{
+								else{
 									lockStatus[i][0] = 0;
-									for(int j = 1; j<lockStatus[i].length;j++)
-									{
-										lockStatus[i][j] = -1;
-									}
 								}
 							}
+							for(int j = 1; j<lockStatus[i].length;j++)
+							{
+								lockStatus[i][j] = -1;
+							}		
 						}
 					}
 					else{
 						for(Lock l : data.get(locations.get(locations.size()-1)))
 						{
-							if(this.time.getTime()>l.startMaintenance() && this.time.getTime()<l.endMaintenance())
+							if(l.getSide().equals("RK"))
 							{
-								if(l.getSide().equals("RK"))
+								if(this.time.getTime()>l.startMaintenance() && this.time.getTime()<l.endMaintenance())
 								{
 									lockStatus[i][0] = 1;
 									for(int j = 1; j<lockStatus[i].length;j++)
 									{
 										lockStatus[i][j] = -1;
-									}
+									}					
 								}
-							}
-							else{
-								if(l.getSide().equals("RK"))
-								{
+								else{
 									lockStatus[i][0] = 0;
 									for(int j = 1; j<lockStatus[i].length;j++)
 									{
-										lockStatus[i][j] = -1;
+										lockStatus[i][j] = -1;										
 									}
 								}
 							}
