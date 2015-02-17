@@ -78,6 +78,7 @@ public class Thesis {
 							ship.cleanUp(r.getInt(6),r.getTimestamp(2),r.getDouble(4),r.getDouble(5),r.getInt(1), results);
 							ship.setVoyage(pData);
 							ship.setWaterLevel(wData,results);
+							ship.setLockStatus(lData, results);
 							ship.writeToCSV("Data.csv");
 						}
 						else{
@@ -90,7 +91,7 @@ public class Thesis {
 												ship.cleanUp(r.getInt(6),r.getTimestamp(2),r.getDouble(4),r.getDouble(5),r.getInt(1), results);
 												ship.setVoyage(pData);
 												ship.setWaterLevel(wData,results);
-
+												ship.setLockStatus(lData, results);
 												ship.writeToCSV("Data.csv");
 												ship = null;
 											}
@@ -108,7 +109,7 @@ public class Thesis {
 										ship.cleanUp(r.getInt(6),r.getTimestamp(2),r.getDouble(4),r.getDouble(5),r.getInt(1), results);
 										ship.setVoyage(pData);
 										ship.setWaterLevel(wData,results);
-
+										ship.setLockStatus(lData, results);
 										ship.writeToCSV("Data.csv");
 										ship = null;
 									}
@@ -126,7 +127,7 @@ public class Thesis {
 									ship.cleanUp(r.getInt(6),r.getTimestamp(2),r.getDouble(4),r.getDouble(5),r.getInt(1), results);
 									ship.setVoyage(pData);
 									ship.setWaterLevel(wData,results);
-
+									ship.setLockStatus(lData, results);
 									ship.writeToCSV("Data.csv");
 									ship = null;
 								}

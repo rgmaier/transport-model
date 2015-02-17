@@ -30,9 +30,7 @@ public class Vessel {
 	private double arrLong;
 	private double arrLat;
 	private int arrId;
-	
-	private String category;
-	
+		
 	private int[][] lockStatus; //1st dimension are all 9 locks, 2nd dimension are status chamber at start of voyage, 1hr before, when in range and 1hr after
 	private int[][] waterLevel; //1st dim are all 9 water level points, 2nd dimension are water level at start of voyage, 1hr before, when in range and 1hr after
 	//something weathery comebacklater TODO
@@ -93,6 +91,13 @@ public class Vessel {
 			for(int j = 0; j<this.waterLevel[i].length;j++)
 			{
 				data += this.waterLevel[i][j]+",";
+			}
+		}
+		for(int i = 0; i<this.lockStatus.length;i++)
+		{
+			for(int j = 0; j<this.lockStatus[i].length;j++)
+			{
+				data += this.lockStatus[i][j]+",";
 			}
 		}
 		
@@ -246,13 +251,137 @@ public class Vessel {
 		return this.time;
 	}
 	
-	public void setLockStatus(Lock[] data)
+	public void setLockStatus(HashMap<Integer,ArrayList<Lock>> data, IWD operation)
 	{
 		//TODO
+		ArrayList<Integer> locations = new ArrayList<Integer>();
 		
-		for(int i = 0; i<data.length;i++)
+		for(int key : data.keySet())
 		{
+			locations.add(key);
+		}
+		
+		for(int i = 0;locations.size()>0;i++,locations.remove(locations.size()-1))
+		{
+			ResultSet a = operation.query("SELECT timeStampLocal FROM viadonau.shipdatadump WHERE userId ="+this.mmsi+" AND riverkm = "+locations.get(locations.size()-1)+
+					" AND (id BETWEEN "+this.id+" AND "+this.arrId+") LIMIT 0,1;");
 			
+			try{
+				int count = 0;
+				if(a.last()){
+					count = a.getRow();
+					a.first();
+				}
+				
+				if(count > 0)
+				{
+					long[] temp = new long[]{this.time.getTime(),a.getTimestamp(1).getTime()-3600000,a.getTimestamp(1).getTime(),a.getTimestamp(1).getTime()+3600000};
+					
+					for(int j = 0; j<this.lockStatus[i].length;j++)
+					{
+						if(i%2 == 0)
+						{
+							for(Lock l : data.get(locations.get(locations.size()-1)))
+							{
+								long start = l.startMaintenance();
+								long end = l.endMaintenance();
+								
+								if(temp[j] > start && temp[j]<end)
+								{
+									if(l.getSide().equals("LK"))
+									{
+										lockStatus[i][j] = 1;
+									}
+								}
+								else{
+									if(l.getSide().equals("LK"))
+									{
+										lockStatus[i][j] = 0;
+									}
+								}
+							}
+						}
+						else{
+							for(Lock l : data.get(locations.get(locations.size()-1)))
+							{
+								if(temp[j] > l.startMaintenance() && temp[j]<l.endMaintenance())
+								{
+									if(l.getSide().equals("RK"))
+									{
+										lockStatus[i][j] = 1;
+									}
+								}
+								else{
+									if(l.getSide().equals("RK"))
+									{
+										lockStatus[i][j] = 0;
+									}
+								}
+							}
+						}
+					}
+				}
+				else{
+					if(i%2 == 0)
+					{
+						for(Lock l : data.get(locations.get(locations.size()-1)))
+						{
+							if(this.time.getTime()>l.startMaintenance() && this.time.getTime()<l.endMaintenance())
+							{
+								if(l.getSide().equals("LK"))
+								{
+									lockStatus[i][0] = 1;
+									for(int j = 1; j<lockStatus[i].length;j++)
+									{
+										lockStatus[i][j] = -1;
+									}
+								}
+							}
+							else{
+								if(l.getSide().equals("LK"))
+								{
+									lockStatus[i][0] = 0;
+									for(int j = 1; j<lockStatus[i].length;j++)
+									{
+										lockStatus[i][j] = -1;
+									}
+								}
+							}
+						}
+					}
+					else{
+						for(Lock l : data.get(locations.get(locations.size()-1)))
+						{
+							if(this.time.getTime()>l.startMaintenance() && this.time.getTime()<l.endMaintenance())
+							{
+								if(l.getSide().equals("RK"))
+								{
+									lockStatus[i][0] = 1;
+									for(int j = 1; j<lockStatus[i].length;j++)
+									{
+										lockStatus[i][j] = -1;
+									}
+								}
+							}
+							else{
+								if(l.getSide().equals("RK"))
+								{
+									lockStatus[i][0] = 0;
+									for(int j = 1; j<lockStatus[i].length;j++)
+									{
+										lockStatus[i][j] = -1;
+									}
+								}
+							}
+						}
+					}
+				}
+				
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
 		}
 		
 		
@@ -266,8 +395,7 @@ public class Vessel {
 		{
 			locations.add(data[i].getRiverkm());
 		}
-		int i = 0;
-		while(locations.size()>0)
+		for(int i = 0; locations.size()>0;i++,locations.remove(locations.size()-1))
 		{
 			ResultSet a = operation.query("SELECT timeStampLocal FROM viadonau.shipdatadump WHERE userId ="+this.mmsi+" AND riverkm = "+locations.get(locations.size()-1)+
 					" AND (id BETWEEN "+this.id+" AND "+this.arrId+") LIMIT 0,1;");
@@ -304,8 +432,6 @@ public class Vessel {
 			{
 				e.printStackTrace();
 			}
-			i++;
-			locations.remove(locations.size()-1);
 		}
 	}
 	

@@ -1,18 +1,15 @@
-import java.sql.Timestamp;
-
-
 public class Lock {
 
 	//3 dimensional array
-	private Timestamp startMaintenance;
-	private Timestamp endMaintenance;
+	private long startMaintenance;
+	private long endMaintenance;
 	
 	private int riverkm;
 	private String location;
 	
 	private String side;
 	
-	public Lock(Timestamp startMaintenance, Timestamp endMaintenance, int riverkm, String location, String side){
+	public Lock(long startMaintenance, long endMaintenance, int riverkm, String location, String side){
 		
 		this.startMaintenance = startMaintenance;
 		this.endMaintenance = endMaintenance;
@@ -37,13 +34,13 @@ public class Lock {
 		return this.riverkm;
 	}
 	
-	public Timestamp startMaintenance()
+	public long startMaintenance()
 	{
 		
 		return this.startMaintenance;
 	}
 	
-	public Timestamp endMaintenance()
+	public long endMaintenance()
 	{
 		return this.endMaintenance;
 	}

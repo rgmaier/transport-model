@@ -155,7 +155,7 @@ public class IWD {
 				while((line=br.readLine()) != null){
 					String[]lineData = line.split(csvSplitBy);
 					tempRiverKm = Integer.parseInt(lineData[2]);
-					classes.add(new Lock(Timestamp.valueOf(lineData[3]),Timestamp.valueOf(lineData[4]),Integer.parseInt(lineData[2]),lineData[0],lineData[1]));
+					classes.add(new Lock(Timestamp.valueOf(lineData[3]).getTime(),Timestamp.valueOf(lineData[4]).getTime(),Integer.parseInt(lineData[2]),lineData[0],lineData[1]));
 				}
 				data.put(tempRiverKm,classes);
 			}
