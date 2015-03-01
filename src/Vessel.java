@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 
@@ -33,7 +34,15 @@ public class Vessel {
 		
 	private int[][] lockStatus; //1st dimension are all 9 locks, 2nd dimension are status chamber at start of voyage, 1hr before, when in range and 1hr after
 	private int[][] waterLevel; //1st dim are all 9 water level points, 2nd dimension are water level at start of voyage, 1hr before, when in range and 1hr after
-	//something weathery comebacklater TODO
+
+	private double[][] airPressure;
+	private int[][] clouds;
+	private double[][] temperature;
+	private int[][] humidity;
+	private String[][] windDirection;
+	private int[][] windForce;
+	private double[][] precipitation;
+	private int[][] snow;
 	
 	private String voyage;
 	
@@ -59,6 +68,14 @@ public class Vessel {
 		this.beam = beam;
 		this.lockStatus = new int[16][4];
 		this.waterLevel = new int[9][4];
+		this.airPressure = new double[3][4];
+		this.clouds = new int[3][4];
+		this.temperature = new double[3][4];
+		this.humidity = new int[3][4];
+		this.windDirection = new String[3][4];
+		this.windForce = new int[3][4];
+		this.precipitation = new double[3][4];
+		this.snow = new int[3][4];
 			}
 	
 	public void writeToCSV(String path)
@@ -84,7 +101,6 @@ public class Vessel {
 		data+= this.sogAvg+",";
 		data+= this.arrLong+",";
 		data+= this.arrLat+",";
-		data+= this.voyage+",";
 		
 		for(int i = 0; i<this.waterLevel.length;i++)
 		{
@@ -100,33 +116,82 @@ public class Vessel {
 				data += this.lockStatus[i][j]+",";
 			}
 		}
-		
-		if(this.riverkm>0){
-			if(this.travelTime<1000||this.distance<1000){
-			}		
-			else{
-				try{
-					File file = new File(path);
-					
-					if(!file.exists())
-					{
-						file.createNewFile();
-					}
-					
-					FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
-					BufferedWriter bw = new BufferedWriter(fw);
-					bw.write(data);
-					bw.newLine();
-					bw.close();
-					System.out.println("Done");
-				}
-				catch(IOException e)
-				{
-					e.printStackTrace();
-				}
+		for(int i = 0; i<this.airPressure.length;i++)
+		{
+			for(int j = 0; j<this.airPressure[i].length;j++)
+			{
+				data += this.airPressure[i][j]+",";
 			}
 		}
-		
+		for(int i = 0; i<this.clouds.length;i++)
+		{
+			for(int j = 0; j<this.clouds[i].length;j++)
+			{
+				data += this.clouds[i][j]+",";
+			}
+		}
+		for(int i = 0; i<this.temperature.length;i++)
+		{
+			for(int j = 0; j<this.temperature[i].length;j++)
+			{
+				data += this.temperature[i][j]+",";
+			}
+		}
+		for(int i = 0; i<this.humidity.length;i++)
+		{
+			for(int j = 0; j<this.humidity[i].length;j++)
+			{
+				data += this.humidity[i][j]+",";
+			}
+		}
+		for(int i = 0; i<this.windDirection.length;i++)
+		{
+			for(int j = 0; j<this.windDirection[i].length;j++)
+			{
+				data += this.windDirection[i][j]+",";
+			}
+		}
+		for(int i = 0; i<this.windForce.length;i++)
+		{
+			for(int j = 0; j<this.windForce[i].length;j++)
+			{
+				data += this.windForce[i][j]+",";
+			}
+		}
+		for(int i = 0; i<this.precipitation.length;i++)
+		{
+			for(int j = 0; j<this.precipitation[i].length;j++)
+			{
+				data += this.precipitation[i][j]+",";
+			}
+		}
+		for(int i = 0; i<this.snow.length;i++)
+		{
+			for(int j = 0; j<this.snow[i].length;j++)
+			{
+				data += this.snow[i][j]+",";
+			}
+		}
+
+		data+= this.voyage;
+
+		try {
+			File file = new File(path);
+
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+
+			FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write(data);
+			bw.newLine();
+			bw.close();
+			System.out.println("Done");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 	
 	public boolean inHarbor(Harbor[] harbor)
@@ -205,6 +270,26 @@ public class Vessel {
 		return this.latitude;
 	}
 	
+	public String getVoyage()
+	{
+		return this.voyage;
+	}
+	
+	public long getTravelTime()
+	{
+		return this.travelTime;
+	}
+	
+	public int getRiverKm()
+	{
+		return this.riverkm;
+	}
+	
+	public int getDistance()
+	{
+		return this.distance;
+	}
+	
 	private void travelTime()
 	{
 		this.travelTime = (this.arrivalTime.getTime()-this.time.getTime())/1000;
@@ -253,7 +338,6 @@ public class Vessel {
 	
 	public void setLockStatus(HashMap<Integer,ArrayList<Lock>> data, IWD operation)
 	{
-		//TODO
 		ArrayList<Integer> locations = new ArrayList<Integer>();
 		
 		for(int key : data.keySet())
@@ -382,7 +466,7 @@ public class Vessel {
 	public void setWaterLevel(WaterLevel[] data, IWD operation)
 	{
 		ArrayList<Integer> locations = new ArrayList<Integer>();
-		
+		int count = 0;
 		for(int i = 0; i<data.length;i++)
 		{
 			locations.add(data[i].getRiverkm());
@@ -393,7 +477,7 @@ public class Vessel {
 					" AND (id BETWEEN "+this.id+" AND "+this.arrId+") LIMIT 0,1;");
 			
 			try{
-				int count = 0;
+				count = 0;
 				if (a.last()) {
 					  count = a.getRow();
 					  a.first();
@@ -401,7 +485,6 @@ public class Vessel {
 				
 				if(count >0)
 				{
-					a.getTimestamp(1).getTime();
 					long[] temp = new long[]{this.time.getTime(),a.getTimestamp(1).getTime()-3600000,a.getTimestamp(1).getTime(),a.getTimestamp(1).getTime()+3600000};
 					
 					for(int j = 0;j<this.waterLevel[i].length;j++)
@@ -422,7 +505,11 @@ public class Vessel {
 			}
 			catch(Exception e)
 			{
-				e.printStackTrace();
+				//e.printStackTrace();
+				System.out.println("MMSI: "+this.mmsi);
+				System.out.println("id: "+this.id);
+				System.out.println("arrID: "+this.arrId);
+				System.out.println("Time of ship: "+this.roundToHour(this.time.getTime()));
 			}
 		}
 	}
@@ -441,7 +528,84 @@ public class Vessel {
 			temp[1] = data.get(this.riverkm+this.distance/1000);
 		}
 		
-		this.voyage = temp[0]+temp[1];
+		if(temp[0].charAt(0)>temp[1].charAt(1))
+		{
+			this.voyage = temp[1]+temp[0];
+		}
+		else{
+			this.voyage = temp[0]+temp[1];
+		}
+	}
+	
+	public void setWeather(HashMap<Integer,Weather> data, IWD operation)
+	{
+		ArrayList<Integer> locations = new ArrayList<Integer>();
+		
+		for(int key : data.keySet())
+		{
+			locations.add(key);
+		}
+		
+		for(int i = 0;locations.size()>0;i++,locations.remove(locations.size()-1))
+		{
+			ResultSet a = operation.query("SELECT timeStampLocal FROM viadonau.shipdatadump WHERE userId ="+this.mmsi+" AND riverkm = "+locations.get(locations.size()-1)+
+					" AND (id BETWEEN "+this.id+" AND "+this.arrId+") LIMIT 0,1;");
+
+			try{
+				int count = 0;
+				if (a.last()) {
+					  count = a.getRow();
+					  a.first();
+				}
+				if(count > 0){
+					long[] temp = new long[]{this.time.getTime(),a.getTimestamp(1).getTime()-3600000,a.getTimestamp(1).getTime(),a.getTimestamp(1).getTime()+3600000};
+					for(int j=0; j<temp.length;j++)
+					{
+						airPressure[i][j] = data.get(locations.get(locations.size()-1)).airPressure.get(this.roundToNearestWeatherTS(temp[j]));
+						clouds[i][j] = data.get(locations.get(locations.size()-1)).clouds.get(this.roundToNearestWeatherTS(temp[j]));
+						temperature[i][j] = data.get(locations.get(locations.size()-1)).temperature.get(this.roundToNearestWeatherTS(temp[j]));
+						humidity[i][j] = data.get(locations.get(locations.size()-1)).humidity.get(this.roundToNearestWeatherTS(temp[j]));
+						windDirection[i][j] = data.get(locations.get(locations.size()-1)).windDirection.get(this.roundToNearestWeatherTS(temp[j]));
+						windForce[i][j] = data.get(locations.get(locations.size()-1)).windForce.get(this.roundToNearestWeatherTS(temp[j]));
+						precipitation[i][j] = data.get(locations.get(locations.size()-1)).precipitation.get(this.roundToNearestWeatherTS(temp[j]));
+						snow[i][j] = data.get(locations.get(locations.size()-1)).snow.get(this.roundToNearestWeatherTS(temp[j]));
+					}
+				}
+				else{
+					airPressure[i][0] = data.get(locations.get(locations.size()-1)).airPressure.get(this.roundToNearestWeatherTS(this.time.getTime()));
+					clouds[i][0] = data.get(locations.get(locations.size()-1)).clouds.get(this.roundToNearestWeatherTS(this.time.getTime()));
+					temperature[i][0] = data.get(locations.get(locations.size()-1)).temperature.get(this.roundToNearestWeatherTS(this.time.getTime()));
+					humidity[i][0] = data.get(locations.get(locations.size()-1)).humidity.get(this.roundToNearestWeatherTS(this.time.getTime()));
+					windDirection[i][0] = data.get(locations.get(locations.size()-1)).windDirection.get(this.roundToNearestWeatherTS(this.time.getTime()));
+					windForce[i][0] = data.get(locations.get(locations.size()-1)).windForce.get(this.roundToNearestWeatherTS(this.time.getTime()));
+					precipitation[i][0] = data.get(locations.get(locations.size()-1)).precipitation.get(this.roundToNearestWeatherTS(this.time.getTime()));
+					snow[i][0] = data.get(locations.get(locations.size()-1)).snow.get(this.roundToNearestWeatherTS(this.time.getTime()));
+					
+					for(int j = 1; j<this.airPressure[i].length;j++)
+					{
+						airPressure[i][j] = -1;
+						clouds[i][j] = -1;
+						temperature[i][j] = -1; 
+						humidity[i][j] = -1;
+						windDirection[i][j] = "-1";
+						windForce[i][j] = -1;
+						precipitation[i][j] = -1;
+						snow[i][j] = -1;
+					}
+				}
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+				System.out.println("MMSI: "+this.mmsi);
+				System.out.println("id: "+this.id);
+				System.out.println("arrID: "+this.arrId);
+				System.out.println("Time of ship: "+this.time);
+				System.out.println("Time of ship: "+this.roundToNearestWeatherTS(this.time.getTime()));
+				///SOMMMERWINTERZEIT ARGH
+				
+			}
+		}
 	}
 	
 	private long roundToHour(long time)
@@ -449,5 +613,39 @@ public class Vessel {
 		time += 1800000;
 		time = time/(3600000);
 		return time*3600000;
+	}
+	
+	private long roundToDay(long time)
+	{
+		//time += 43200000;
+		time = time/86400000;
+		return time*86400000-7200000;
+	}
+	
+	private long roundToNearestWeatherTS(long time)
+	{
+		Timestamp ts = Timestamp.valueOf("2013-10-27 00:00:00");
+		Date d = new Date(ts.getTime());
+		if (d.after(new Date(time))) {
+			if (time > roundToDay(time)
+					&& time < (roundToDay(time) + 3600000 * 10)) {
+				return roundToDay(time) + 3600000 * 7;
+			} else if (time > (roundToDay(time) + 3600000 * 11)
+					&& time < (roundToDay(time) + 3600000 * 16)) {
+				return roundToDay(time) + 3600000 * 14;
+			} else {
+				return roundToDay(time) + 3600000 * 19;
+			}
+		} else {
+			if (time > roundToDay(time)
+					&& time < (roundToDay(time) + 3600000 * 11)) {
+				return roundToDay(time) + 3600000 * 8;
+			} else if (time > (roundToDay(time) + 3600000 * 12)
+					&& time < (roundToDay(time) + 3600000 * 17)) {
+				return roundToDay(time) + 3600000 * 15;
+			} else {
+				return roundToDay(time) + 3600000 * 20;
+			}
+		}
 	}
 }
