@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 
 
@@ -360,7 +359,7 @@ public class Vessel {
 				
 				if(count > 0)
 				{
-					long[] temp = new long[]{this.time.getTime(),a.getTimestamp(1).getTime()-3600000,a.getTimestamp(1).getTime(),a.getTimestamp(1).getTime()+3600000};
+					long[] temp = this.timestamps(a);
 					
 					for(int j = 0; j<this.lockStatus[i].length;j++)
 					{
@@ -457,6 +456,10 @@ public class Vessel {
 			catch(Exception e)
 			{
 				e.printStackTrace();
+				System.out.println("MMSI: "+this.mmsi);
+				System.out.println("id: "+this.id);
+				System.out.println("arrID: "+this.arrId);
+				System.out.println("Time of ship: "+this.roundToHour(this.time.getTime()));
 			}
 		}
 		
@@ -475,41 +478,48 @@ public class Vessel {
 		{
 			ResultSet a = operation.query("SELECT timeStampLocal FROM viadonau.shipdatadump WHERE userId ="+this.mmsi+" AND riverkm = "+locations.get(locations.size()-1)+
 					" AND (id BETWEEN "+this.id+" AND "+this.arrId+") LIMIT 0,1;");
-			
-			try{
+			int exc = 0;
+			long exception = 0L;
+			try {
 				count = 0;
 				if (a.last()) {
-					  count = a.getRow();
-					  a.first();
+					count = a.getRow();
+					a.first();
 				}
-				
-				if(count >0)
-				{
-					long[] temp = new long[]{this.time.getTime(),a.getTimestamp(1).getTime()-3600000,a.getTimestamp(1).getTime(),a.getTimestamp(1).getTime()+3600000};
+
+				if (count > 0) {
+					long[] temp = this.timestamps(a);
 					
-					for(int j = 0;j<this.waterLevel[i].length;j++)
-					{
-						this.waterLevel[i][j] = data[locations.size()-1].getHashmap().get(this.roundToHour(temp[j]));
+					for (int j = 0; j < temp.length; j++) {
+						exc = j;
+						exception = temp[j];
+						this.waterLevel[i][j] = data[locations.size() - 1]
+								.getHashmap().get(this.roundToHour(temp[j]));
 
 					}
-				}
-				else if(count == 0){
-					//Fill array with -1;
-					this.waterLevel[i][0] = data[locations.size()-1].getHashmap().get(this.roundToHour(this.time.getTime()));
-					for(int j = 1;j<this.waterLevel[i].length;j++)
-					{
+				} else if (count == 0) {
+					// Fill array with -1;
+					this.waterLevel[i][0] = data[locations.size() - 1]
+							.getHashmap().get(
+									this.roundToHour(this.time.getTime()));
+					for (int j = 1; j < this.waterLevel[i].length; j++) {
 						this.waterLevel[i][j] = -1;
 					}
 				}
-				
 			}
 			catch(Exception e)
 			{
-				//e.printStackTrace();
+				e.printStackTrace();
+				System.out.println("Time temp: "+exception);
+				System.out.println("Time rnd: "+this.roundToNearestWeatherTS(exception));
+				System.out.println("Time day: "+this.roundToDay(exception));
+				System.out.println("it: "+exc);
 				System.out.println("MMSI: "+this.mmsi);
 				System.out.println("id: "+this.id);
 				System.out.println("arrID: "+this.arrId);
-				System.out.println("Time of ship: "+this.roundToHour(this.time.getTime()));
+				System.out.println("Time of ship: "+this.time);
+				System.out.println("Time of ship: "+this.time.getTime());
+				System.out.println("Time of ship: "+this.roundToNearestWeatherTS(this.time.getTime()));
 			}
 		}
 	}
@@ -517,23 +527,24 @@ public class Vessel {
 	public void setVoyage(HashMap<Integer,String> data)
 	{		
 		String temp[] = new String[2];
-		
-		if(this.upRiver.equals("t"))
-		{
-			temp[1] = data.get(this.riverkm);
-			temp[0] = data.get(this.riverkm-this.distance/1000);
+		temp[0] = data.get(this.riverkm);
+
+		if (this.upRiver.equals("t")) {
+			temp[1] = data.get(this.riverkm - this.distance / 1000);
+		} else {
+			temp[1] = data.get(this.riverkm + this.distance / 1000);
 		}
-		else{
-			temp[0] = data.get(this.riverkm);
-			temp[1] = data.get(this.riverkm+this.distance/1000);
-		}
-		
-		if(temp[0].charAt(0)>temp[1].charAt(1))
-		{
-			this.voyage = temp[1]+temp[0];
-		}
-		else{
-			this.voyage = temp[0]+temp[1];
+		if (temp[0] == null) {
+			this.voyage = temp[0] + temp[1];
+		} 
+		else if (temp[1] == null){
+			this.voyage = temp[1] + temp[0];
+		}else {
+			if (temp[0].charAt(0) > temp[1].charAt(0)) {
+				this.voyage = temp[1] + temp[0];
+			} else {
+				this.voyage = temp[0] + temp[1];
+			}
 		}
 	}
 	
@@ -550,7 +561,8 @@ public class Vessel {
 		{
 			ResultSet a = operation.query("SELECT timeStampLocal FROM viadonau.shipdatadump WHERE userId ="+this.mmsi+" AND riverkm = "+locations.get(locations.size()-1)+
 					" AND (id BETWEEN "+this.id+" AND "+this.arrId+") LIMIT 0,1;");
-
+			long exception = 0L;
+			int exc = 0;
 			try{
 				int count = 0;
 				if (a.last()) {
@@ -558,9 +570,11 @@ public class Vessel {
 					  a.first();
 				}
 				if(count > 0){
-					long[] temp = new long[]{this.time.getTime(),a.getTimestamp(1).getTime()-3600000,a.getTimestamp(1).getTime(),a.getTimestamp(1).getTime()+3600000};
+					long[] temp = this.timestamps(a);
 					for(int j=0; j<temp.length;j++)
 					{
+						exception = temp[j];
+						exc = j;
 						airPressure[i][j] = data.get(locations.get(locations.size()-1)).airPressure.get(this.roundToNearestWeatherTS(temp[j]));
 						clouds[i][j] = data.get(locations.get(locations.size()-1)).clouds.get(this.roundToNearestWeatherTS(temp[j]));
 						temperature[i][j] = data.get(locations.get(locations.size()-1)).temperature.get(this.roundToNearestWeatherTS(temp[j]));
@@ -597,11 +611,16 @@ public class Vessel {
 			catch(Exception e)
 			{
 				e.printStackTrace();
+				System.out.println("Time temp: "+exception);
+				System.out.println("Time rnd: "+this.roundToNearestWeatherTS(exception));
+				System.out.println("Time day: "+this.roundToDay(exception));
+				System.out.println("it: "+exc);
 				System.out.println("MMSI: "+this.mmsi);
 				System.out.println("id: "+this.id);
 				System.out.println("arrID: "+this.arrId);
 				System.out.println("Time of ship: "+this.time);
 				System.out.println("Time of ship: "+this.roundToNearestWeatherTS(this.time.getTime()));
+				
 				///SOMMMERWINTERZEIT ARGH
 				
 			}
@@ -612,40 +631,74 @@ public class Vessel {
 	{
 		time += 1800000;
 		time = time/(3600000);
-		return time*3600000;
+		if(time*3600000 == 1382832000000L)
+		{
+			return time*3600000+3600000;
+		}
+		else{
+		return time*3600000;}
 	}
 	
 	private long roundToDay(long time)
 	{
-		//time += 43200000;
+		time += 43200000;
 		time = time/86400000;
 		return time*86400000-7200000;
 	}
 	
 	private long roundToNearestWeatherTS(long time)
-	{
-		Timestamp ts = Timestamp.valueOf("2013-10-27 00:00:00");
-		Date d = new Date(ts.getTime());
-		if (d.after(new Date(time))) {
-			if (time > roundToDay(time)
-					&& time < (roundToDay(time) + 3600000 * 10)) {
+	{          //1382824800000
+		long d = 1382824800000L;
+		if (d > roundToDay(time)) {
+			if (time >= roundToDay(time)
+					&& time <= (roundToDay(time) + 3600000 * 10)) {
 				return roundToDay(time) + 3600000 * 7;
-			} else if (time > (roundToDay(time) + 3600000 * 11)
-					&& time < (roundToDay(time) + 3600000 * 16)) {
+			} else if (time >= (roundToDay(time) + 3600000 * 11)
+					&& time <= (roundToDay(time) + 3600000 * 16)) {
 				return roundToDay(time) + 3600000 * 14;
 			} else {
 				return roundToDay(time) + 3600000 * 19;
 			}
 		} else {
-			if (time > roundToDay(time)
-					&& time < (roundToDay(time) + 3600000 * 11)) {
+			if (time >= roundToDay(time)
+					&& time <= (roundToDay(time) + 3600000 * 11)) {
 				return roundToDay(time) + 3600000 * 8;
-			} else if (time > (roundToDay(time) + 3600000 * 12)
-					&& time < (roundToDay(time) + 3600000 * 17)) {
+			} else if (time >= (roundToDay(time) + 3600000 * 12)
+					&& time <= (roundToDay(time) + 3600000 * 17)) {
 				return roundToDay(time) + 3600000 * 15;
 			} else {
 				return roundToDay(time) + 3600000 * 20;
 			}
+		}
+	}
+	
+	private long[] timestamps(ResultSet a) {
+		try {
+			if (this.roundToHour(a.getTimestamp(1).getTime()) == 1382828400000L) {
+				return new long[] { roundToHour(this.time.getTime()),
+						roundToHour(a.getTimestamp(1).getTime() - 3600000),
+						roundToHour(a.getTimestamp(1).getTime()),
+						roundToHour(a.getTimestamp(1).getTime() + 7200000) };
+			} else if (this.roundToHour(a.getTimestamp(1).getTime()) == 1382835600000L) {
+				return new long[] { roundToHour(this.time.getTime()),
+						roundToHour(a.getTimestamp(1).getTime() - 7200000),
+						roundToHour(a.getTimestamp(1).getTime()),
+						roundToHour(a.getTimestamp(1).getTime() + 3600000) };
+			} else if (this.roundToHour(a.getTimestamp(1).getTime()) == 1375308000000L) {
+				return new long[] { roundToHour(this.time.getTime()),
+						roundToHour(a.getTimestamp(1).getTime()),
+						roundToHour(a.getTimestamp(1).getTime()),
+						roundToHour(a.getTimestamp(1).getTime() + 3600000) };
+			} else {
+				return new long[] { roundToHour(this.time.getTime()),
+						roundToHour(a.getTimestamp(1).getTime() - 3600000),
+						roundToHour(a.getTimestamp(1).getTime()),
+						roundToHour(a.getTimestamp(1).getTime() + 3600000) };
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 }

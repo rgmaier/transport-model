@@ -22,22 +22,21 @@ public class Thesis {
 		HashMap<Integer, String> pData = thesis.readLocations("POI.csv");
 		HashMap<Integer, Weather> mData = thesis.readWeatherData("IWD/");
 
-		HashMap<String, ArrayList<Long>> avgTravelTime = new HashMap<String, ArrayList<Long>>();
-
 		DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss:SSS");
 
 		try {
 			ArrayList<Integer> mmsi = new ArrayList<Integer>();
-			mmsi=thesis.getMMSI();
-			/*mmsi.add(17140534);
-			mmsi.add(244660182);
+			//mmsi=thesis.getMMSI();
+			mmsi.add(203999335);
+			mmsi.add(205430290);
 			mmsi.add(205377590);
-			mmsi.add(205479090);
-			mmsi.add(471710);
-			mmsi.add(205387990);
-			mmsi.add(203999222);
-			mmsi.add(17140534);*/
+			mmsi.add(211430820);
+			mmsi.add(211430770);
+			mmsi.add(211209890);
+			mmsi.add(211142440);
+			mmsi.add(207072325);
 			
+						
 			Vessel ship = null;
 
 			int count = 0;
@@ -91,20 +90,7 @@ public class Thesis {
 							if (ship.getRiverKm() > 0) {
 								if (ship.getTravelTime() > 1000
 										&& ship.getDistance() > 1000) {
-									if (avgTravelTime.get(ship
-											.getVoyage()) == null) {
-										ArrayList<Long> tmp = new ArrayList<Long>();
-										tmp.add(ship.getTravelTime());
-										avgTravelTime.put(
-												ship.getVoyage(), tmp);
-									} else {
-										ArrayList<Long> tmp = avgTravelTime
-												.get(ship.getVoyage());
-										tmp.add(ship.getTravelTime());
-										avgTravelTime.put(
-												ship.getVoyage(), tmp);
-									}
-									ship.writeToCSV("Data.csv");
+										ship.writeToCSV("Data.csv");
 								}
 							}
 						} else {
@@ -129,20 +115,7 @@ public class Thesis {
 												if (ship.getRiverKm() > 0) {
 													if (ship.getTravelTime() > 1000
 															&& ship.getDistance() > 1000) {
-														if (avgTravelTime.get(ship
-																.getVoyage()) == null) {
-															ArrayList<Long> tmp = new ArrayList<Long>();
-															tmp.add(ship.getTravelTime());
-															avgTravelTime.put(
-																	ship.getVoyage(), tmp);
-														} else {
-															ArrayList<Long> tmp = avgTravelTime
-																	.get(ship.getVoyage());
-															tmp.add(ship.getTravelTime());
-															avgTravelTime.put(
-																	ship.getVoyage(), tmp);
-														}
-														ship.writeToCSV("Data.csv");
+															ship.writeToCSV("Data.csv");
 													}
 												}
 												ship = null;
@@ -165,19 +138,6 @@ public class Thesis {
 										if (ship.getRiverKm() > 0) {
 											if (ship.getTravelTime() > 1000
 													&& ship.getDistance() > 1000) {
-												if (avgTravelTime.get(ship
-														.getVoyage()) == null) {
-													ArrayList<Long> tmp = new ArrayList<Long>();
-													tmp.add(ship.getTravelTime());
-													avgTravelTime.put(
-															ship.getVoyage(), tmp);
-												} else {
-													ArrayList<Long> tmp = avgTravelTime
-															.get(ship.getVoyage());
-													tmp.add(ship.getTravelTime());
-													avgTravelTime.put(
-															ship.getVoyage(), tmp);
-												}
 												ship.writeToCSV("Data.csv");
 											}
 										}
@@ -207,19 +167,6 @@ public class Thesis {
 									if (ship.getRiverKm() > 0) {
 										if (ship.getTravelTime() > 1000
 												&& ship.getDistance() > 1000) {
-											if (avgTravelTime.get(ship
-													.getVoyage()) == null) {
-												ArrayList<Long> tmp = new ArrayList<Long>();
-												tmp.add(ship.getTravelTime());
-												avgTravelTime.put(
-														ship.getVoyage(), tmp);
-											} else {
-												ArrayList<Long> tmp = avgTravelTime
-														.get(ship.getVoyage());
-												tmp.add(ship.getTravelTime());
-												avgTravelTime.put(
-														ship.getVoyage(), tmp);
-											}
 											ship.writeToCSV("Data.csv");
 										}
 									}
@@ -243,31 +190,21 @@ public class Thesis {
 		System.out.println(dateFormat.format(new Date()));
 		thesis.close();
 		
-		System.out.println(avgTravelTime.entrySet()); 
-		HashMap<String,Double> avgTime = new HashMap<String,Double>();
-		for(String key : avgTravelTime.keySet())
-		{
-			double temp = 0;
-			for(long e : avgTravelTime.get(key))
-			{
-				temp+=e;
-			}
-			temp = temp/(avgTravelTime.get(key).size());
-			avgTime.put(key, temp);
-		}
-		System.out.println(avgTime.entrySet());
-		ArrayList<HashMap<Integer,String>> rList = thesis.readDelayData("IWD/");
+		//This is /r/theydidthemath
+		double speed = 9.7662;
+		
 		String[][] fData = thesis.readData("Data.csv");
 		for(int i = 0; i<fData.length;i++)
 		{
-			fData[i][217] = ""+avgTime.get(fData[i][216]);
-			fData[i][218] = rList.get(0).get((int) mRound(avgTime.get(fData[i][216])-Double.parseDouble(fData[i][217]),5));
-			fData[i][219] = rList.get(1).get((int) mRound(avgTime.get(fData[i][216])-Double.parseDouble(fData[i][217]),10));
-			fData[i][220] = rList.get(2).get((int) mRound(avgTime.get(fData[i][216])-Double.parseDouble(fData[i][217]),15));
-			fData[i][221] = rList.get(3).get((int) mRound(avgTime.get(fData[i][216])-Double.parseDouble(fData[i][217]),30));
+			fData[i][217] = ""+((Integer.parseInt(fData[i][16])/1000)/speed)*60;
+			fData[i][218] = ""+((int) mRound(Integer.parseInt(fData[i][15])/60-Double.parseDouble(fData[i][217]),20));
+			fData[i][219] = ""+((int) mRound(Integer.parseInt(fData[i][15])/60-Double.parseDouble(fData[i][217]),40));
+			fData[i][220] = ""+((int) mRound(Integer.parseInt(fData[i][15])/60-Double.parseDouble(fData[i][217]),60));
+			fData[i][221] = ""+((int) mRound(Integer.parseInt(fData[i][15])/60-Double.parseDouble(fData[i][217]),120));
+			fData[i][222] = ""+(Integer.parseInt(fData[i][15])/60-Double.parseDouble(fData[i][217]));
 		}
-		//Only write if voyage does not contain null to filter out damaged data.
 		thesis.writeToFile(fData);
+		thesis.deleteFile("Data.csv");
 		System.out.println("Finished");
 	}
 	

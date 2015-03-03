@@ -1,6 +1,9 @@
 import java.sql.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.io.*;
 import java.util.*;
+import java.util.Date;
 
 public class IWD {
 	private final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
@@ -335,7 +338,7 @@ public class IWD {
 		String[][] data = null;
 
 		try {
-			data = new String[this.countLines(path)][222];
+			data = new String[this.countLines(path)][223];
 			br = new BufferedReader(new FileReader(path));
 			int i = 0;
 			while ((line = br.readLine()) != null) {
@@ -438,30 +441,52 @@ public class IWD {
 	}
 
 	public void writeToFile(String[][] content) {
-		String path = "Data_final.csv";
+		DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-d HH:mm:ss");
+		String path = dateFormat.format(new Date())+".csv";
 		for (int i = 0; i < content.length; i++) {
 			String tmp = "";
 			for (int j = 0; j < content[i].length - 1; j++) {
 				tmp += content[i][j] + ",";
 			}
 			tmp += content[i][content[i].length - 1];
-			try {
-				File file = new File(path);
+			if(!content[i][216].contains("null"))
+			{
+				try {
+					File file = new File(path);
 
-				if (!file.exists()) {
-					file.createNewFile();
+					if (!file.exists()) {
+						file.createNewFile();
+					}
+
+					FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
+					BufferedWriter bw = new BufferedWriter(fw);
+					bw.write(tmp);
+					bw.newLine();
+					bw.close();
+					System.out.println("Done");
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
-
-				FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
-				BufferedWriter bw = new BufferedWriter(fw);
-				bw.write(tmp);
-				bw.newLine();
-				bw.close();
-				System.out.println("Done");
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
 		}
 
+	}
+	
+	public void deleteFile(String path) {
+		try {
+
+			File file = new File(path);
+
+			if (file.delete()) {
+				System.out.println(file.getName() + " is deleted!");
+			} else {
+				System.out.println("Delete operation is failed.");
+			}
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+		}
 	}
 }
