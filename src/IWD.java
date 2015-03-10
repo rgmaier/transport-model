@@ -441,7 +441,7 @@ public class IWD {
 	}
 
 	public void writeToFile(String[][] content) {
-		DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-d HH:mm:ss");
+		DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-d");
 		String path = dateFormat.format(new Date())+".csv";
 		for (int i = 0; i < content.length; i++) {
 			String tmp = "";

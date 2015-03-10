@@ -12,39 +12,33 @@ public class Thesis {
 		Scanner input = new Scanner(System.in);
 		String user = input.next();
 		String pw = input.next();
-		IWD thesis = new IWD(user, pw);
+		
 		IWD results = new IWD(user, pw);
 		input.close();
 
-		Harbor[] data = thesis.readHarborData("Harbor.csv");
-		HashMap<Integer, ArrayList<Lock>> lData = thesis.readLockData("IWD/");
-		WaterLevel[] wData = thesis.readWaterData("IWD/");
-		HashMap<Integer, String> pData = thesis.readLocations("POI.csv");
-		HashMap<Integer, Weather> mData = thesis.readWeatherData("IWD/");
+		Harbor[] data = results.readHarborData("IWD/Harbor.csv");
+		HashMap<Integer, ArrayList<Lock>> lData = results.readLockData("IWD/");
+		WaterLevel[] wData = results.readWaterData("IWD/");
+		HashMap<Integer, String> pData = results.readLocations("IWD/POI.csv");
+		HashMap<Integer, Weather> mData = results.readWeatherData("IWD/");
 
 		DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss:SSS");
 
 		try {
-			ArrayList<Integer> mmsi = new ArrayList<Integer>();
-			//mmsi=thesis.getMMSI();
-			mmsi.add(203999335);
-			mmsi.add(205430290);
-			mmsi.add(205377590);
-			mmsi.add(211430820);
-			mmsi.add(211430770);
-			mmsi.add(211209890);
-			mmsi.add(211142440);
-			mmsi.add(207072325);
 			
+			ArrayList<Integer> mmsi = new ArrayList<Integer>();
+			mmsi=results.getMMSI();
 						
 			Vessel ship = null;
 
 			int count = 0;
 
 			while (mmsi.size() > 0) {
+				IWD thesis = new IWD(user, pw);
 				System.out.println(mmsi.size());
 				System.out.println(dateFormat.format(new Date()));
-				ResultSet r =thesis.query("SELECT id, timeStampLocal, userId, longitude, latitude, riverkm, upriver, shipName, vesselType, hazardCargo, draught, length, beam FROM viadonau.shipdatadump WHERE userId ="+mmsi.get(mmsi.size()-1)+" AND timeStampLocal > '2013-08-01 00:00:00' ;");
+				System.out.println(mmsi.get(mmsi.size()-1));
+				ResultSet r =thesis.query("SELECT id, timeStampLocal, userId, longitude, latitude, riverkm, upriver, shipName, vesselType, hazardCargo, draught, length, beam FROM viadonau.shipdatadump WHERE userId ="+mmsi.get(mmsi.size()-1)+" AND timeStampLocal > '2013-08-01 00:00:00' AND timeStampLocal < '2013-10-29 00:00:00';");
 				//ResultSet r = thesis
 				//		.query("SELECT id, timeStampLocal, userId, longitude, latitude, riverkm, upriver, shipName, vesselType, hazardCargo, draught, length, beam FROM shipdatadump WHERE userId =244660182;");
 
@@ -182,18 +176,20 @@ public class Thesis {
 
 				}
 				count = 0;
+				r.close();
 				mmsi.remove(mmsi.size() - 1);
+				thesis.close();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		System.out.println(dateFormat.format(new Date()));
-		thesis.close();
+		
 		
 		//This is /r/theydidthemath
 		double speed = 9.7662;
 		
-		String[][] fData = thesis.readData("Data.csv");
+		String[][] fData = results.readData("Data.csv");
 		for(int i = 0; i<fData.length;i++)
 		{
 			fData[i][217] = ""+((Integer.parseInt(fData[i][16])/1000)/speed)*60;
@@ -203,9 +199,10 @@ public class Thesis {
 			fData[i][221] = ""+((int) mRound(Integer.parseInt(fData[i][15])/60-Double.parseDouble(fData[i][217]),120));
 			fData[i][222] = ""+(Integer.parseInt(fData[i][15])/60-Double.parseDouble(fData[i][217]));
 		}
-		thesis.writeToFile(fData);
-		thesis.deleteFile("Data.csv");
+		results.writeToFile(fData);
+		results.deleteFile("Data.csv");
 		System.out.println("Finished");
+		results.close();
 	}
 	
 	public static double mRound(double value, double factor){

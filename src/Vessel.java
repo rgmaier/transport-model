@@ -350,9 +350,9 @@ public class Vessel {
 			ResultSet a = operation.query("SELECT timeStampLocal FROM viadonau.shipdatadump WHERE userId ="+this.mmsi+" AND riverkm = "+locations.get(locations.size()-1)+
 					" AND (id BETWEEN "+this.id+" AND "+this.arrId+") LIMIT 0,1;");
 			
-			try{
+			try {
 				int count = 0;
-				if(a.last()){
+				if (a.last()) {
 					count = a.getRow();
 					a.first();
 				}
@@ -451,7 +451,7 @@ public class Vessel {
 						}
 					}
 				}
-				
+				a.close();
 			}
 			catch(Exception e)
 			{
@@ -461,6 +461,7 @@ public class Vessel {
 				System.out.println("arrID: "+this.arrId);
 				System.out.println("Time of ship: "+this.roundToHour(this.time.getTime()));
 			}
+			
 		}
 		
 		
@@ -506,6 +507,7 @@ public class Vessel {
 						this.waterLevel[i][j] = -1;
 					}
 				}
+				a.close();
 			}
 			catch(Exception e)
 			{
@@ -607,6 +609,7 @@ public class Vessel {
 						snow[i][j] = -1;
 					}
 				}
+				a.close();
 			}
 			catch(Exception e)
 			{
